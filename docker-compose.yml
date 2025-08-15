@@ -1,0 +1,36 @@
+services:
+  postgres:
+    container_name: investor-details-db
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: deepdeep
+      POSTGRES_DB: investor_details_database
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - postgres:/var/lib/postgres/data
+
+volumes:
+  postgres:
+
+
+
+#  springboot-app:
+#    build: ./springboot-app
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - postgres
+#      - risk-analyzer
+
+#  risk-analyzer:
+#      build: ./risk-analysis-service
+#      ports:
+#        - "8000:8000"
+#      depends_on:
+#        - postgres
+#      environment:
+#        DB_URL: postgresql://postgres:deepdeep@investor-details-db:5432/investor_details_database

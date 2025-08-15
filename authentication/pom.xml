@@ -5,14 +5,14 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.3</version>
+		<version>3.5.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.microservice</groupId>
-	<artifactId>my-stock-portfolio</artifactId>
+	<artifactId>authentication</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>my-stock-portfolio</name>
-	<description>Demo project for Spring Boot</description>
+	<name>authentication</name>
+	<description>Authentication service for Portfolio management system</description>
 	<url/>
 	<licenses>
 		<license/>
