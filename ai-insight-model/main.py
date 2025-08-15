@@ -21,7 +21,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Or specify your frontend's URL
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,9 +32,7 @@ SUPPORTED_STOCKS = ['AAPL', 'GOOGL', 'TSLA', 'AMZN', 'MSFT']
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# Utility function to convert NumPy types to native Python types
 def convert_numpy_types(obj):
-    """Convert NumPy types to native Python types for JSON serialization"""
     if isinstance(obj, np.integer):
         return int(obj)
     elif isinstance(obj, np.floating):
@@ -52,7 +50,6 @@ class SimplifiedPortfolioAnalyzer:
         self.stock_data = {}
 
     def fetch_stock_data(self, symbols: list, days: int = 30):
-        """Fetch recent stock data for analysis"""
         end_date = datetime.now()
         start_date = end_date - timedelta(days=days)
 
@@ -97,7 +94,7 @@ class SimplifiedPortfolioAnalyzer:
             position_value = shares * current_price
             impact = daily_change * position_value
 
-            # Store analysis data (convert all numpy types)
+            # Store analysis data
             results['analysis_summary'][symbol] = {
                 'current_price': current_price,
                 'daily_change': daily_change,
@@ -139,7 +136,6 @@ class SimplifiedPortfolioAnalyzer:
         return results
 
     def calculate_diversification(self, portfolio_holdings: dict):
-        """Calculate diversification score and clustering analysis"""
         if not portfolio_holdings:
             return {'score': 0, 'clusters': {}, 'suggestions': []}
 
@@ -161,9 +157,9 @@ class SimplifiedPortfolioAnalyzer:
         weights = [value / total_value for value in position_values.values()]
         hhi = sum(w ** 2 for w in weights)
 
-        # Convert to diversification score (0-1, higher is better)
-        max_hhi = 1.0  # Completely concentrated
-        min_hhi = 1.0 / len(SUPPORTED_STOCKS)  # Perfect diversification
+        # Convert to diversification score
+        max_hhi = 1.0
+        min_hhi = 1.0 / len(SUPPORTED_STOCKS)
         diversification_score = (max_hhi - hhi) / (max_hhi - min_hhi) if max_hhi != min_hhi else 1.0
         diversification_score = max(0, min(1, diversification_score))
 
@@ -180,7 +176,6 @@ class SimplifiedPortfolioAnalyzer:
         }
 
     def perform_clustering(self):
-        """Cluster stocks based on their characteristics"""
         try:
             features_data = []
             symbols = []
@@ -195,7 +190,6 @@ class SimplifiedPortfolioAnalyzer:
                 if len(returns) < 10:
                     continue
 
-                # Extract features
                 avg_return = float(returns.mean())
                 volatility = float(returns.std())
                 sharpe = avg_return / volatility if volatility > 0 else 0
@@ -206,7 +200,6 @@ class SimplifiedPortfolioAnalyzer:
             if len(features_data) < 3:
                 return {}
 
-            # Perform K-means clustering
             scaler = StandardScaler()
             features_scaled = scaler.fit_transform(features_data)
 
@@ -217,7 +210,7 @@ class SimplifiedPortfolioAnalyzer:
             # Group stocks by cluster
             clusters = {}
             for i, symbol in enumerate(symbols):
-                cluster_id = int(cluster_labels[i])  # Convert numpy int to Python int
+                cluster_id = int(cluster_labels[i])
                 if cluster_id not in clusters:
                     clusters[cluster_id] = []
                 clusters[cluster_id].append(symbol)
@@ -237,12 +230,10 @@ class SimplifiedPortfolioAnalyzer:
 
         current_symbols = set(portfolio_holdings.keys())
 
-        # Check cluster representation
         for cluster_id, cluster_stocks in clusters.items():
             cluster_representation = len([s for s in cluster_stocks if s in current_symbols])
 
             if cluster_representation == 0:
-                # Missing cluster - suggest adding
                 suggested_stock = cluster_stocks[0]
                 suggestions.append({
                     'type': 'add_stock',
@@ -251,7 +242,6 @@ class SimplifiedPortfolioAnalyzer:
                     'action': f'Consider adding {suggested_stock} for better diversification'
                 })
             elif cluster_representation == len(cluster_stocks) and len(cluster_stocks) > 1:
-                # Over-concentrated in cluster
                 suggestions.append({
                     'type': 'reduce_concentration',
                     'symbols': [s for s in cluster_stocks if s in current_symbols],
@@ -263,16 +253,13 @@ class SimplifiedPortfolioAnalyzer:
 
 
 def generate_ai_summary(trend_analysis: dict, diversification_analysis: dict, portfolio_total: float):
-    """Generate AI-powered natural language summary"""
 
-    # Prepare data for AI prompt
     gains = trend_analysis['unusual_gains']
     losses = trend_analysis['unusual_losses']
     volatility_spikes = trend_analysis['volatility_spikes']
     div_score = diversification_analysis['score']
     suggestions = diversification_analysis['suggestions']
 
-    # Create structured prompt
     gains_str = "- Gains: " + str([(g['symbol'], f"{g['daily_change'] * 100:.1f}%") for g in gains]) if gains else ""
     losses_str = "- Losses: " + str(
         [(l['symbol'], f"{l['daily_change'] * 100:.1f}%") for l in losses]) if losses else ""
@@ -304,9 +291,8 @@ def generate_ai_summary(trend_analysis: dict, diversification_analysis: dict, po
     try:
         client = OpenAI()
 
-        # Use gpt-3.5-turbo instead of gpt-4 (more widely available)
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",  # Changed from gpt-4 to gpt-3.5-turbo
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system",
                  "content": "You are a professional financial advisor providing clear, actionable portfolio insights."},
@@ -320,7 +306,6 @@ def generate_ai_summary(trend_analysis: dict, diversification_analysis: dict, po
 
     except Exception as e:
         print(f"AI generation error: {e}")
-        # Fallback summary
         status = "performing well" if len(gains) > len(losses) else "showing mixed results" if len(gains) == len(
             losses) else "facing some challenges"
         return f"Your ${portfolio_total:,.0f} portfolio is {status} with {len(gains)} stocks showing gains and {len(losses)} showing losses. Diversification score is {div_score:.1f}/1.0. Consider reviewing positions with high volatility and maintaining balanced exposure across different stock clusters."
@@ -328,10 +313,9 @@ def generate_ai_summary(trend_analysis: dict, diversification_analysis: dict, po
 
 @app.get("/generate-ai-insights/{user_id}")
 def generate_ai_insights(user_id: int):
-    """Main endpoint to generate AI insights for a user's portfolio"""
 
     try:
-        # Step 1: Get user's portfolio data
+        # Get user's portfolio data
         portfolio_query = "SELECT * FROM investors_portfolio WHERE investor_id = :user_id"
         with engine.connect() as connection:
             portfolio_result = connection.execute(text(portfolio_query), {"user_id": user_id}).fetchone()
@@ -342,7 +326,7 @@ def generate_ai_insights(user_id: int):
         portfolio_id = portfolio_result[0]
         print(f"Analyzing portfolio {portfolio_id} for user {user_id}")
 
-        # Step 2: Get stock holdings
+        # Get stock holdings
         query = """
                 SELECT stock_symbol, quantity
                 FROM stock_holdings
@@ -368,26 +352,26 @@ def generate_ai_insights(user_id: int):
 
         print(f"Portfolio holdings: {portfolio_holdings}")
 
-        # Step 3: Initialize analyzer and fetch market data
+        # Initialize analyzer and fetch market data
         analyzer = SimplifiedPortfolioAnalyzer()
         analyzer.fetch_stock_data(list(portfolio_holdings.keys()))
 
         if not analyzer.stock_data:
             raise HTTPException(status_code=500, detail="Failed to fetch market data")
 
-        # Step 4: Perform trend analysis
+        # Perform trend analysis
         trend_analysis = analyzer.analyze_trends(portfolio_holdings)
         print(f"Trend analysis: {trend_analysis}")
 
-        # Step 5: Perform diversification analysis
+        # Perform diversification analysis
         diversification_analysis = analyzer.calculate_diversification(portfolio_holdings)
         print(f"Diversification analysis: {diversification_analysis}")
 
-        # Step 6: Generate AI summary
+        # Generate AI summary
         portfolio_total = diversification_analysis.get('total_value', 0)
         ai_summary = generate_ai_summary(trend_analysis, diversification_analysis, portfolio_total)
 
-        # Step 7: Compile comprehensive response (convert all numpy types)
+        # Compile comprehensive response (convert all numpy types)
         response = {
             "user_id": user_id,
             "portfolio_id": portfolio_id,
