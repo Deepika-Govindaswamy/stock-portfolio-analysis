@@ -8,7 +8,7 @@ export default function AIPortfolioAnalysis() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Mock API data - matches your JSON structure exactly
+
   const mockAnalysisData = {
     "user_id": 19,
     "portfolio_id": 8,
