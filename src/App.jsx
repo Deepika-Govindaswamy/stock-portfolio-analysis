@@ -3,6 +3,7 @@ import Home from './Home'
 import './App.css'
 import { Routes, Route } from "react-router-dom";
 import AIPortfolioAnalysis from './components/AIPortfolioAnalysis';
+import Navbar from './components/Navbar';
 
 const TradingDashboard = lazy(() => import('./components/TradingDashboard'));
 const Login = lazy(() => import('./components/Login'));
@@ -75,29 +76,39 @@ function App() {
   
   return (
 
-    <Routes>
-      <Route path="/" element=
-        {<Home isLoginOpen={isLoginOpen} setIsLoginOpen={setIsLoginOpen}
-          isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}
-          email={email} setEmail={setEmail}
-          stocks={stocks} chartData={chartData}
-          userId = {userId} setUserId = {setUserId}
-        />}
-      />
+    <div>
 
-      <Route path="/my-portfolio-dashboard" element={<TradingDashboard isLoggedIn={isLoggedIn} email={email} stocks={stocks} userId={userId}/>} />
+        <Navbar isLoginOpen={isLoginOpen} setIsLoginOpen={setIsLoginOpen} 
+                      isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}
+                      email={email} setEmail={setEmail}
+                      setUserId={setUserId} />
 
-      <Route path="/login" element=
-        {<Login isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}
-          email={email} setEmail={setEmail}
-          setUserId = {setUserId}
-          setIsLoginOpen ={setIsLoginOpen}
-        />} />
+        <Routes>
+          <Route path="/" element=
+            {<Home isLoginOpen={isLoginOpen} setIsLoginOpen={setIsLoginOpen}
+              isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}
+              email={email} setEmail={setEmail}
+              stocks={stocks} chartData={chartData}
+              userId = {userId} setUserId = {setUserId}
+            />}
+          />
 
-      <Route path='/risk-analysis' element={<RiskAnalysisHome userId = {userId} />}></Route>
-      <Route path='/generate-ai-insights' element = {<AIPortfolioAnalysis/>}></Route>
+          <Route path="/my-portfolio-dashboard" element={<TradingDashboard isLoggedIn={isLoggedIn} email={email} stocks={stocks} userId={userId}/>} />
 
-    </Routes>
+          <Route path="/login" element=
+            {<Login isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}
+              email={email} setEmail={setEmail}
+              setUserId = {setUserId}
+              setIsLoginOpen ={setIsLoginOpen}
+            />} />
+
+          <Route path='/risk-analysis' element={<RiskAnalysisHome userId = {userId} />}></Route>
+
+          <Route path='/generate-ai-insights' element = {<AIPortfolioAnalysis userId = {userId}/>}></Route>
+
+      </Routes>
+    </div>
+
 
   )
 }

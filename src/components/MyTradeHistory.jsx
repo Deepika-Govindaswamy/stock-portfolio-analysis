@@ -4,7 +4,7 @@ export default function MyTradeHistory({ userId, refreshPortfolio, setLoading })
   const [transactionHistory, setTransactionHistory] = useState([]);
 
   useEffect(() => {
-    if (!userId) return; // Safety check
+    if (!userId) return;
     setLoading(true);
 
     fetch(`http://localhost:8080/portfolio/transactions/${userId}`)
@@ -52,7 +52,7 @@ export default function MyTradeHistory({ userId, refreshPortfolio, setLoading })
           .slice()
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
           .map((txns) => (
-          <div key={txns.transactionId || `${txns.stockSymbol}-${txns.transactionCreatedAt}`} className="flex justify-between mb-4">
+          <div key={txns.timestamp || `${txns.stockSymbol}-${txns.transactionCreatedAt}`} className="flex justify-between mb-4">
             <div className="flex items-center justify-between py-3 w-full">
               <div>
                 <div className="font-semibold">{txns.transactionType === 'BUY' ? 'Bought' : 'Sold'} {txns.stockSymbol}</div>

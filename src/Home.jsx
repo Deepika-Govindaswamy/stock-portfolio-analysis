@@ -12,13 +12,6 @@ const Home = ({ isLoginOpen, setIsLoginOpen, isLoggedIn, setIsLoggedIn, email, s
 
   return (
     <div className={`min-h-screen bg-gray-50 text-gray-900`}>
-      {/* Header */}
-      <Navbar isLoginOpen={isLoginOpen} setIsLoginOpen={setIsLoginOpen} 
-              isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}
-              email={email} setEmail={setEmail}
-              setUserId={setUserId}
-      />
-
       <div className="flex">
 
         {isLoginOpen ? (

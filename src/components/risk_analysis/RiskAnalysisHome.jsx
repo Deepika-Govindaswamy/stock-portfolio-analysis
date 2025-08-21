@@ -24,8 +24,7 @@ export default function RiskAnalysisHome ({isLoginOpen, setIsLoginOpen, isLogged
     const fetchRiskData = async () => {
       try {
         setLoading(true);
-        // stockData = await fetch(`http://localhost:8080/portfolio/holdings/${localStorage.getItem("userId")}`);
-
+      
         const response = await fetch(`http://127.0.0.1:8000/risk-summary/${userId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch risk data");
@@ -74,14 +73,7 @@ export default function RiskAnalysisHome ({isLoginOpen, setIsLoginOpen, isLogged
   };
 
   return (
-      <div className="min-h-screen bg-gray-50 text-gray-900">
-
-      <Navbar isLoginOpen={isLoginOpen} setIsLoginOpen={setIsLoginOpen} 
-                    isLoggedIn={localStorage.getItem("isLoggedIn") === "true"} setIsLoggedIn={setIsLoggedIn}
-                    email={localStorage.getItem("email")} setEmail={setEmail}
-                    setUserId={setUserId}
-      />
-
+    <div className="min-h-screen bg-gray-50 text-gray-900">
       <div className="max-w-6xl mx-auto p-4">
 
         {/* Header */}
