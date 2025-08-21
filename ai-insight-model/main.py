@@ -17,7 +17,7 @@ from sqlalchemy import text
 from fastapi import FastAPI, HTTPException
 from database import engine
 
-app = FastAPI()
+app: FastAPI = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
@@ -371,7 +371,7 @@ def generate_ai_insights(user_id: int):
         portfolio_total = diversification_analysis.get('total_value', 0)
         ai_summary = generate_ai_summary(trend_analysis, diversification_analysis, portfolio_total)
 
-        # Compile comprehensive response (convert all numpy types)
+        # Compile comprehensive response
         response = {
             "user_id": user_id,
             "portfolio_id": portfolio_id,
@@ -439,4 +439,12 @@ def generate_ai_insights(user_id: int):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    # uvicorn.run("main:app", host="127.0.0.1", port=8001, reload=True, log_level="info")
+
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=8001,
+        reload=True,
+        log_level="info"
+    )
