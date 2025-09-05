@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { X, TrendingUp, TrendingDown, AlertTriangle, CheckCircle } from 'lucide-react';
 import Navbar from '../Navbar';
@@ -6,6 +7,7 @@ export default function RiskAnalysisHome ({isLoginOpen, setIsLoginOpen, isLogged
   const [isOpen, setIsOpen] = useState(true);
   const [riskData, setRiskData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [notReceivedData, setNotReceivedData] = useState(true);
 
   const getCompanyName = (symbol) => {
     switch (symbol) {
@@ -19,7 +21,6 @@ export default function RiskAnalysisHome ({isLoginOpen, setIsLoginOpen, isLogged
   }
 
   useEffect(() => {
-
     console.log(userId)
     const fetchRiskData = async () => {
       try {
@@ -30,8 +31,18 @@ export default function RiskAnalysisHome ({isLoginOpen, setIsLoginOpen, isLogged
           throw new Error("Failed to fetch risk data");
         }
         const data = await response.json();
-        setRiskData(data);
+        
+        // Check if the response has risk_summary and it's not empty
+        if (data && data.risk_summary && data.risk_summary.length > 0) {
+          setRiskData(data);
+          setNotReceivedData(false);
+        } else {
+          setNotReceivedData(true);
+          setRiskData(null);
+        }
       } catch (error) {
+        setNotReceivedData(true);
+        setRiskData(null);
         console.error("Error fetching risk data:", error);
       } finally {
         setLoading(false);
@@ -39,7 +50,7 @@ export default function RiskAnalysisHome ({isLoginOpen, setIsLoginOpen, isLogged
     };
 
     fetchRiskData();
-  }, []);
+  }, [userId]);
 
   const getRiskColor = (riskLevel) => {
     switch (riskLevel) {
@@ -63,7 +74,11 @@ export default function RiskAnalysisHome ({isLoginOpen, setIsLoginOpen, isLogged
   const formatBeta = (value) => value.toFixed(4);
 
   const getOverallRisk = () => {
-    if (!riskData) return 'Unknown';
+    // Add proper null/undefined checks
+    if (!riskData || !riskData.risk_summary || !Array.isArray(riskData.risk_summary) || riskData.risk_summary.length === 0) {
+      return 'Unknown';
+    }
+    
     const highRiskCount = riskData.risk_summary.filter(stock => stock.risk_level === 'High').length;
     const totalStocks = riskData.risk_summary.length;
     
@@ -78,8 +93,7 @@ export default function RiskAnalysisHome ({isLoginOpen, setIsLoginOpen, isLogged
 
         {/* Header */}
         <div className="bg-white rounded-lg p-6 mb-6">
-          
-          {!loading && riskData && (
+          {!loading && riskData && riskData.risk_summary && riskData.risk_summary.length > 0 && (
             <div className="flex items-center gap-4 text-sm">
               <h1 className="text-black text-2xl font-semibold">Portfolio Risk Analysis</h1>
               <div className={`flex items-center gap-2 px-3 py-1 rounded-full border ${getRiskColor(getOverallRisk())}`}>
@@ -90,16 +104,25 @@ export default function RiskAnalysisHome ({isLoginOpen, setIsLoginOpen, isLogged
           )}
         </div>
 
+        {/* No Data State */}
+        {!loading && notReceivedData && (
+          <div className="bg-slate-100 rounded-lg p-12 text-center">
+            <AlertTriangle size={48} className="text-gray-400 mx-auto mb-4" />
+            <h2 className="text-black text-xl font-semibold mb-2">No Portfolio Data</h2>
+            <p className="text-gray-600 mb-4">Start trading to generate AI insights and risk analysis for your portfolio.</p>
+          </div>
+        )}
+
         {/* Loading State */}
         {loading && (
           <div className="bg-white rounded-lg p-12 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
             <p className="text-gray-900">Analyzing portfolio risk...</p>
           </div>
         )}
 
         {/* Risk Summary Cards */}
-        {!loading && riskData && (
+        {!loading && riskData && riskData.risk_summary && riskData.risk_summary.length > 0 && (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
             {riskData.risk_summary.map((stock, index) => (
               <div key={index} className="bg-zinc-100 rounded-lg p-6">
@@ -144,7 +167,7 @@ export default function RiskAnalysisHome ({isLoginOpen, setIsLoginOpen, isLogged
         )}
 
         {/* Risk Metrics Legend */}
-        {!loading && riskData && (
+        {!loading && riskData && riskData.risk_summary && riskData.risk_summary.length > 0 && (
           <div className="bg-slate-100 rounded-lg p-6 mt-6">
             <h3 className="text-black text-lg font-semibold mb-4">Risk Metrics Explained</h3>
             <div className="grid md:grid-cols-3 gap-4 text-sm">
