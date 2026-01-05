@@ -15,7 +15,9 @@ The Stock Portfolio Analysis System allows users to:
 The platform integrates backend financial analytics, real-time data handling, and AI-based insight generation, providing users with a comprehensive understanding of their investment portfolio.
 
 
-### 🧠 Problem the System Solves
+### 🧠 Problem Addressed
+
+This platform converts investment complexity into actionable business insights by empowering investors with personalized portfolio analytics and risk evaluation.
 
 Retail investors and banking customers often face challenges such as:
 
@@ -25,6 +27,7 @@ Retail investors and banking customers often face challenges such as:
 * Poor separation of analytics and transactional logic in monolithic systems, makes the system inefficient to scale. This is addressed by implementing the microservices architecture.
 
 ### 🧱 High-Level System Architecture
+
 #### 📌 Portfolio Management
 
 * Invest in stocks
